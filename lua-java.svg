@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">
+  <title>LuaJava</title>
+  <desc>The classic Lua logo reproduced with SVG by gudzpoz.</desc>
+  <metadata id="license" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license rdf:resource="https://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License rdf:about="https://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs>
+    <path id="arc" d="M 27.6318 512 A 484.3681 484.3681 0 0 1 512 27.6318" />
+  </defs>
+  <circle cx="512" cy="512" r="344" fill="#010180" />
+  <!-- Dashes: Radius: 484.3681, Center: (512, 512) -->
+  <path d="M 745.7851 87.7866 A 484.3681 484.3681 0 0 0 344.9433 57.3523 M 57.3523 344.9433 A 484.3681 484.3681 0 1 0 936.2134 278.2149" fill="none" stroke-dasharray="40 40"
+    stroke="#808080" stroke-width="10" />
+  <circle cx="656" cy="368" r="96" fill="white" />
+  <circle cx="854.5" cy="169.5" r="96" fill="#d4023e" />
+  <text x="512" y="670" text-anchor="middle" font-size="300" fill="white" font-family="Helvetica">
+    Lua
+  </text>
+  <text fill="#010180" font-size="148" baseline-shift="-0.3em" stroke="white" stroke-width="6" font-weight="800">
+    <textPath href="#arc" startOffset="50%" text-anchor="middle" font-family="Helvetica">
+      Java
+    </textPath>
+  </text>
+</svg>

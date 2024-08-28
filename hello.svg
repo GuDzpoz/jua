@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420">
+<rect width="1000" height="420" />
+<g>
+<text x="0" y="0" class="fg-10">
+➜  
+</text>
+<text x="33.75" y="0" class="fg-14">
+~
+</text>
+<text x="56.25" y="0" class="">
+java -jar example-all.jar
+</text>
+<text x="0" y="28">
+Lua Version: 5.4
+</text>
+<text x="0" y="56">
+Running Lua 5.4
+</text>
+<text x="0" y="84">
+>>> 
+</text>
+<text x="45" y="84" class="fg-15">
+print   java.method java.import                    .out,         ,
+</text>
+<text x="45" y="84" class="fg-1">
+                                'java.lang.System'      'println' 'java.lang.Object'
+</text>
+<text x="45" y="84" class="fg-11">
+      =
+</text>
+<text x="45" y="84" class="fg-13">
+                   (           (                  )                                 )
+</text>
+<text x="0" y="112">
+>>> 
+</text>
+<text x="45" y="112" class="fg-15">
+Ansi   java.import
+</text>
+<text x="45" y="112" class="fg-11">
+     =
+</text>
+<text x="45" y="112" class="fg-13">
+                  (                           )
+</text>
+<text x="45" y="112" class="fg-1">
+                   'org.fusesource.jansi.Ansi'
+</text>
+<text x="0" y="140">
+>>> 
+</text>
+<text x="45" y="140" class="fg-15">
+runnable
+</text>
+<text x="45" y="140" class="fg-13">
+           {
+</text>
+<text x="45" y="140" class="fg-11">
+         =
+</text>
+<text x="22.5" y="168">
+> 
+</text>
+<text x="45" y="168" class="fg-15">
+  run
+</text>
+<text x="45" y="168" class="fg-13">
+                ()
+</text>
+<text x="45" y="168" class="fg-12">
+        function
+</text>
+<text x="45" y="168" class="fg-11">
+      =
+</text>
+<text x="22.5" y="196">
+> 
+</text>
+<text x="45" y="196" class="fg-15">
+          Ansi ansi   render
+</text>
+<text x="45" y="196" class="fg-1">
+                             '@|magenta,bold Hello World |@'
+</text>
+<text x="45" y="196" class="fg-11">
+    print     :      :
+</text>
+<text x="45" y="196" class="fg-13">
+         (         ()       (                               ))
+</text>
+<text x="22.5" y="224">
+> 
+</text>
+<text x="45" y="224" class="fg-12">
+  end
+</text>
+<text x="22.5" y="252">
+> 
+</text>
+<text x="45" y="252" class="fg-13">
+}
+</text>
+<text x="0" y="280">
+>>> 
+</text>
+<text x="45" y="280" class="fg-15">
+thread   java.import                     java.proxy                     , runnable
+</text>
+<text x="45" y="280" class="fg-1">
+                     'java.lang.Thread'             'java.lang.Runnable'
+</text>
+<text x="45" y="280" class="fg-11">
+       =
+</text>
+<text x="45" y="280" class="fg-13">
+                    (                  )(          (                              ))
+</text>
+<text x="0" y="308">
+>>> 
+</text>
+<text x="45" y="308" class="fg-15">
+thread start
+</text>
+<text x="45" y="308" class="fg-11">
+      :
+</text>
+<text x="45" y="308" class="fg-13">
+            ()
+</text>
+<text x="0" y="336">
+>>> 
+</text>
+<text x="45" y="336" class="fg-13">
+Hello World
+</text>
+</g>
+<style>
+svg {
+dominant-baseline: hanging
+}
+text {
+fill: #ccc;
+font-family: Consolas,Menlo,Bitstream Vera Sans Mono,monospace,Powerline Symbols;
+font-size: 20px;
+font-weight: 400;
+white-space: pre;
+}
+text.fg-1 {
+fill: #dd3c69;
+}
+text.fg-10 {
+fill: #4ebf22;
+font-weight: 700;
+}
+text.fg-10 {
+fill: #4ebf22;
+font-weight: 700;
+}
+text.fg-11 {
+fill: #ddaf3c;
+font-weight: 700;
+}
+text.fg-12 {
+fill: #26b0d7;
+font-weight: 700;
+}
+text.fg-13 {
+fill: #b954e1;
+font-weight: 700;
+}
+text.fg-14 {
+fill: #54e1b9;
+font-weight: 700;
+}
+text.fg-15 {
+fill: white;
+font-weight: 700;
+}
+g {
+  transform: translate(0.5em, 1em);
+}
+</style>
+</svg>
