@@ -46,7 +46,7 @@ dependencies {
     implementation project(path: ':lua54', configuration: 'desktopNatives')
     implementation project(path: ':luajit', configuration: 'desktopNatives')
     implementation 'info.picocli:picocli:4.7.6'
-    implementation 'org.antlr:antlr4-runtime:4.13.0'
+    implementation 'org.antlr:antlr4-runtime:4.13.2'
     implementation "org.jline:jline-reader:$jlineVersion"
     implementation "org.jline:jline-console:$jlineVersion"
     implementation "org.jline:jline-terminal:$jlineVersion"
