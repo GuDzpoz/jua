@@ -50,14 +50,6 @@ static int luaJ_len(lua_State * L, int index) {
     return lua_objlen(L, index);
 }
 
-static int luaJ_loadbuffer(lua_State * L, unsigned char * buffer, int size, const char * name) {
-    return luaL_loadbuffer(L, (const char *) buffer, size, name);
-}
-
-static int luaJ_dobuffer(lua_State * L, unsigned char * buffer, int size, const char * name) {
-    return (luaL_loadbuffer(L, (const char *) buffer, size, name) || lua_pcall(L, 0, LUA_MULTRET, 0));
-}
-
 static int luaJ_resume(lua_State * L, int narg) {
     return lua_resume(L, narg);
 }

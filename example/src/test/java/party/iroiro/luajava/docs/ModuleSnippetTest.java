@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import party.iroiro.luajava.ClassPathLoader;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.lua51.Lua51;
+import party.iroiro.luajava.value.LuaValue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static party.iroiro.luajava.Lua.LuaType.FUNCTION;
 
 public class ModuleSnippetTest {
     @Test
@@ -12,6 +16,9 @@ public class ModuleSnippetTest {
 try (Lua L = new Lua51()) {
     L.openLibrary("package");
     L.setExternalLoader(new ClassPathLoader());
+    // Lua#require is equivalent to `require` in Lua.
+    LuaValue compat = L.require("suite.luajava-compat");
+    assertEquals(FUNCTION, compat.get("newInstance").type());
 }
 // #endregion classPathLoaderTest
     }

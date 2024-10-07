@@ -34,6 +34,13 @@ import java.util.*;
 
 /**
  * A {@code lua_State *} wrapper, representing a Lua thread
+ *
+ * <p>
+ * Most methods in this interface are wrappers around the corresponding Lua C API functions,
+ * and requires a certain degree of familiarity with the Lua C API.
+ * If you are not that familiar with the Lua C API, you may want to read the Lua manual first
+ * or try out {@link LuaValue}-related API at the {@link LuaThread} interface.
+ * </p>
  */
 public interface Lua extends AutoCloseable, LuaThread {
     String GLOBAL_THROWABLE = "__jthrowable__";
@@ -99,6 +106,18 @@ public interface Lua extends AutoCloseable, LuaThread {
      * @param string the string
      */
     void push(@NotNull String string);
+
+    /**
+     * Pushes a buffer as a raw string onto the stack
+     *
+     * <p>
+     * The pushed bytes are from buffer[buffer.position()] to buffer[buffer.limit() - 1].
+     * So remember to call {@link ByteBuffer#flip()} or set the position and limit before pushing.
+     * </p>
+     *
+     * @param buffer the buffer, which might contain invalid UTF-8 characters and zeros
+     */
+    void push(@NotNull ByteBuffer buffer);
 
     /**
      * Push the element onto the stack, converted to lua tables
@@ -550,6 +569,8 @@ public interface Lua extends AutoCloseable, LuaThread {
      * </p>
      *
      * @param index the non-pseudo index
+     * @see #pushValue(int)
+     * @see #replace(int)
      */
     void insert(int index);
 
@@ -564,6 +585,8 @@ public interface Lua extends AutoCloseable, LuaThread {
      * Pushes a copy of the element at the given valid index onto the stack
      *
      * @param index the index of the element to be copied
+     * @see #insert(int)
+     * @see #replace(int)
      */
     void pushValue(int index);
 
@@ -595,6 +618,8 @@ public interface Lua extends AutoCloseable, LuaThread {
      * </p>
      *
      * @param index the index to move to
+     * @see #insert(int)
+     * @see #pushValue(int)
      */
     void replace(int index);
 
@@ -618,23 +643,33 @@ public interface Lua extends AutoCloseable, LuaThread {
      * Loads a string as a Lua chunk
      *
      * <p>
-     * This function uses {@code luaL_loadstring} to load the chunk.
+     * This function eventually uses {@code lua_load} to load the chunk in the string {@code script}.
+     * <strong>Also as lua_load, this function only loads the chunk; it does not run it.</strong>
      * </p>
      *
      * @param script the Lua chunk
+     * @see #run(String)
+     * @see #pCall(int, int)
      */
     void load(String script) throws LuaException;
-
 
     /**
      * Loads a buffer as a Lua chunk
      *
      * <p>
-     * This function uses {@code luaL_loadbuffer} to load the chunk.
+     * This function eventually uses {@code lua_load} to load the chunk in the string {@code script}.
+     * <strong>Also as lua_load, this function only loads the chunk; it does not run it.</strong>
+     * </p>
+     *
+     * <p>
+     * The used contents are from buffer[buffer.position()] to buffer[buffer.limit() - 1].
+     * So remember to call {@link ByteBuffer#flip()} or set the position and limit before pushing.
      * </p>
      *
      * @param buffer the buffer, must be a direct buffer
      * @param name   the chunk name, used for debug information and error messages
+     * @see #run(Buffer, String)
+     * @see #pCall(int, int)
      */
     void load(Buffer buffer, String name) throws LuaException;
 
@@ -642,7 +677,7 @@ public interface Lua extends AutoCloseable, LuaThread {
      * Loads and runs the given string
      *
      * <p>
-     * This function uses {@code luaL_dostring} to run the chunk.
+     * It is equivalent to first calling {@link #load(String)} and then {@link #pCall(int, int)} the loaded chunk.
      * </p>
      *
      * @param script the Lua chunk
@@ -650,11 +685,15 @@ public interface Lua extends AutoCloseable, LuaThread {
     void run(String script) throws LuaException;
 
     /**
-     * Loads and runa a buffer
+     * Loads and runs a buffer
      *
      * <p>
-     * This function uses {@code (luaL_loadbuffer(L, str) || lua_pcall(L, 0, LUA_MULTRET, 0))}
-     * to load and run the chunk.
+     * It is equivalent to first calling {@link #load(Buffer, String)} and then {@link #pCall(int, int)} the loaded chunk.
+     * </p>
+     *
+     * <p>
+     * The used contents are from buffer[buffer.position()] to buffer[buffer.limit() - 1].
+     * So remember to call {@link ByteBuffer#flip()} or set the position and limit before pushing.
      * </p>
      *
      * @param buffer the buffer, must be a direct buffer
@@ -749,10 +788,12 @@ public interface Lua extends AutoCloseable, LuaThread {
      * Yields a coroutine
      *
      * <p>
-     * This is not yet implemented yet.
+     * This is not implemented because we have no way to resume execution from a Java stack through a C stack
+     * back to a Java stack.
      * </p>
      *
      * @param n the number of values from the stack that are passed as results to lua_resume
+     * @throws UnsupportedOperationException always
      */
     void yield(int n);
 
@@ -773,7 +814,7 @@ public interface Lua extends AutoCloseable, LuaThread {
 
     /**
      * Creates a new empty table and pushes it onto the stack
-     * 
+     *
      * <p>
      * It is equivalent to {@link #createTable(int, int) createTable(0, 0)}.
      * </p>
@@ -1208,6 +1249,7 @@ public interface Lua extends AutoCloseable, LuaThread {
          * <ul>
          *     <li>Boolean -&gt; boolean</li>
          *     <li>String -&gt; string</li>
+         *     <li>ByteBuffer -&gt; string</li>
          *     <li>Number -&gt; lua_Number</li>
          *     <li>Map / Collection / Array -&gt; table (recursive)</li>
          *     <li>Object -&gt; Java object wrapped by a metatable {@link #pushJavaObject}</li>

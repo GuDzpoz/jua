@@ -25,6 +25,7 @@ package party.iroiro.luajava.value;
 import org.jetbrains.annotations.NotNull;
 import party.iroiro.luajava.Lua;
 
+import java.nio.ByteBuffer;
 import java.util.AbstractMap;
 import java.util.Objects;
 import java.util.Set;
@@ -119,6 +120,14 @@ public abstract class AbstractLuaValue<T extends Lua>
     @Override
     public boolean toBoolean() {
         return toInteger() != 0;
+    }
+
+    @Override
+    public ByteBuffer toBuffer() {
+        push(L);
+        ByteBuffer buffer = L.toBuffer(-1);
+        L.pop(1);
+        return buffer;
     }
 
     @Override

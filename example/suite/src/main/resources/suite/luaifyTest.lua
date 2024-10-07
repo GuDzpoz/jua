@@ -31,3 +31,13 @@ assert(type(iArr) == 'table')
 for i = 8, 12 do
     assert(iArr[i - 7] == i)
 end
+
+buffer = java.import('java.nio.ByteBuffer'):allocateDirect(3)
+buffer:put(1, 1)
+buffer:put(2, 2)
+s = java.luaify(buffer)
+assert(type(s) == 'string')
+assert(#s == 3)
+assert(s:byte(1) == 0)
+assert(s:byte(2) == 1)
+assert(s:byte(3) == 2)

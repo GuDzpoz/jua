@@ -50,3 +50,22 @@ others.intf = { run = function() b = true end }
 assert(others.intf ~= nil)
 others.intf:run()
 assert(b)
+
+assert(others.buffer == nil)
+s = '123'
+others.buffer = s
+assert(others.buffer ~= nil)
+assert(others.buffer:limit() == 3)
+assert(others.buffer:get(0) == s:byte(1))
+assert(others.buffer:get(1) == s:byte(2))
+assert(others.buffer:get(2) == s:byte(3))
+
+assert(others.any == nil)
+others.any = true
+assert(others.any == true)
+others.any = 1
+assert(others.any == 1)
+others.any = '2'
+assert(others.any == '2')
+others.any = {1, 2, 3}
+others.any = function() end

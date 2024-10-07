@@ -25,6 +25,9 @@ package party.iroiro.luajava.value;
 import org.jetbrains.annotations.Nullable;
 import party.iroiro.luajava.Lua;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Basic {@link LuaValue} implementation wrapping immutable values
  * @param <T> the value type
@@ -59,7 +62,7 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
         };
     }
 
-    private static class ImmutableBoolean extends ImmutableLuaValue<Boolean> {
+    private static final class ImmutableBoolean extends ImmutableLuaValue<Boolean> {
         private ImmutableBoolean(Lua L, Boolean value) {
             super(L, Lua.LuaType.BOOLEAN, value);
         }
@@ -78,7 +81,7 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
         return new ImmutableBoolean(L, false);
     }
 
-    private static class ImmutableNumber extends ImmutableLuaValue<Double> {
+    private static final class ImmutableNumber extends ImmutableLuaValue<Double> {
         private ImmutableNumber(Lua L, Double value) {
             super(L, Lua.LuaType.NUMBER, value);
         }
@@ -89,7 +92,7 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
         }
     }
 
-    private static class ImmutableLong extends ImmutableLuaValue<Long> {
+    private static final class ImmutableLong extends ImmutableLuaValue<Long> {
         private ImmutableLong(Lua L, Long value) {
             super(L, Lua.LuaType.NUMBER, value);
         }
@@ -100,14 +103,30 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
         }
 
         @Override
-        public @Nullable Object toJavaObject() {
+        public Object toJavaObject() {
             return value.doubleValue();
         }
     }
 
-    private static class ImmutableString extends ImmutableLuaValue<String> {
-        private ImmutableString(Lua L, String value) {
+    private static final class ImmutableString extends ImmutableLuaValue<ByteBuffer> {
+        @Nullable
+        private String javaString;
+
+        private static ByteBuffer wrap(byte[] bytes) {
+            ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
+            buffer.put(bytes);
+            buffer.flip();
+            return buffer.asReadOnlyBuffer();
+        }
+
+        private ImmutableString(Lua L, ByteBuffer value) {
             super(L, Lua.LuaType.STRING, value);
+            javaString = null;
+        }
+
+        private ImmutableString(Lua L, String value) {
+            super(L, Lua.LuaType.STRING, wrap(value.getBytes(StandardCharsets.UTF_8)));
+            javaString = value;
         }
 
         @Override
@@ -117,7 +136,25 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
 
         @Override
         public int length() {
-            return value.length();
+            return value.limit();
+        }
+
+        @Override
+        public Object toJavaObject() {
+            return toString();
+        }
+
+        @Override
+        public String toString() {
+            if (javaString == null) {
+                javaString = StandardCharsets.UTF_8.decode(value.duplicate()).toString();
+            }
+            return javaString;
+        }
+
+        @Override
+        public ByteBuffer toBuffer() {
+            return value.duplicate();
         }
     }
 
@@ -131,5 +168,13 @@ public abstract class ImmutableLuaValue<T> extends AbstractLuaValue<Lua> {
 
     public static LuaValue STRING(Lua L, String s) {
         return new ImmutableString(L, s);
+    }
+
+    public static LuaValue BUFFER(Lua L, ByteBuffer buffer) {
+        ByteBuffer directBuffer = ByteBuffer.allocateDirect(buffer.limit());
+        buffer.position(0);
+        directBuffer.put(buffer);
+        directBuffer.flip();
+        return new ImmutableString(L, directBuffer.asReadOnlyBuffer());
     }
 }

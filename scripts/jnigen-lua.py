@@ -252,6 +252,7 @@ paramTypedDescriptions = {
     's': {'const char *': 'the string'},
     'sig': {'const char *': 'the method signature used in {@code GetMethodID}'},
     'size': {'size_t': 'size', 'int': 'size'},
+    'start': {'int': 'the starting index'},
     'stat': {'int': '(I have no idea)'},
     'str': {'const char *': 'string'},
     't': {'int': 'the stack index'},
@@ -562,6 +563,7 @@ extraFunctions = [
             params=[
                 ('lua_State *', 'L'),
                 ('unsigned char *', 'buffer'),
+                ('int', 'start'),
                 ('int', 'size'),
                 ('const char *', 'name'),
             ],
@@ -575,6 +577,7 @@ extraFunctions = [
             params=[
                 ('lua_State *', 'L'),
                 ('unsigned char *', 'buffer'),
+                ('int', 'start'),
                 ('int', 'size'),
                 ('const char *', 'name'),
             ],
@@ -636,6 +639,19 @@ extraFunctions = [
                 ('JNIEnv *', 'env'),
                 ('lua_State *', 'L'),
                 ('jobject', 'func'),
+            ],
+        ),
+    ),
+    LuaAPI(
+        name='luaJ_pushlstring',
+        description='Push a buffer as a raw Lua string',
+        signature=FunctionSignature(
+            returns='void',
+            params=[
+                ('lua_State *', 'L'),
+                ('unsigned char *', 'buffer'),
+                ('int', 'start'),
+                ('int', 'size'),
             ],
         ),
     ),

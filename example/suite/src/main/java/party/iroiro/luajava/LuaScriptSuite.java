@@ -9,6 +9,7 @@ import party.iroiro.luajava.luajit.LuaJitNatives;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.Buffer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -232,6 +233,9 @@ public class LuaScriptSuite<T extends AbstractLua> {
         public Map<Object, Object> map = null;
         public Override annotation;
         public Runnable intf;
+        public Buffer buffer;
+
+        public Object any;
     }
 
     public static abstract class AbstractClass {

@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
  * Most reflection features on the lua side rely on this class.
  * </p>
  */
+@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
 public abstract class JuaAPI {
     /**
      * Allocates a direct buffer whose memory is managed by Java
@@ -649,7 +650,11 @@ public abstract class JuaAPI {
         Method[] methods = MEMBER_METHOD_CACHE.get(clazz, name);
         if (methods == null) {
             List<Method> namedMethods = new ArrayList<>();
-            for (Method method : clazz.getMethods()) {
+            Class<?> publicClass = clazz;
+            while (!Modifier.isPublic(publicClass.getModifiers())) {
+                publicClass = publicClass.getSuperclass();
+            }
+            for (Method method : publicClass.getMethods()) {
                 if (method.getName().equals(name)) {
                     namedMethods.add(method);
                 }
@@ -924,7 +929,9 @@ public abstract class JuaAPI {
         }
         Class<?>[] classes = getClasses(notSignature);
         try {
-            return clazz.getConstructor(classes);
+            Constructor<?> constructor = clazz.getConstructor(classes);
+            CONSTRUCTOR_CACHE.put(clazz, notSignature, constructor);
+            return constructor;
         } catch (NoSuchMethodException e) {
             return null;
         }
@@ -940,13 +947,16 @@ public abstract class JuaAPI {
      */
     @Nullable
     private static Method matchMethod(Class<?> clazz, String name, String notSignature) {
-        Method cached = METHOD_CACHE.get(clazz, name + ",," + notSignature);
+        String key = name + ",," + notSignature;
+        Method cached = METHOD_CACHE.get(clazz, key);
         if (cached != null) {
             return cached;
         }
         Class<?>[] classes = getClasses(notSignature);
         try {
-            return clazz.getMethod(name, classes);
+            Method method = clazz.getMethod(name, classes);
+            METHOD_CACHE.put(clazz, key, method);
+            return method;
         } catch (NoSuchMethodException e) {
             return null;
         }
@@ -972,11 +982,15 @@ public abstract class JuaAPI {
                 return null;
             }
         } else if (type == Lua.LuaType.BOOLEAN) {
-            if (clazz == boolean.class || clazz == Boolean.class) {
+            if (clazz == boolean.class || clazz.isAssignableFrom(Boolean.class)) {
                 return L.toBoolean(index);
             }
-        } else if (type == Lua.LuaType.STRING && clazz.isAssignableFrom(String.class)) {
-            return L.toString(index);
+        } else if (type == Lua.LuaType.STRING) {
+            if (clazz.isAssignableFrom(String.class)) {
+                return L.toString(index);
+            } else if (clazz.isAssignableFrom(ByteBuffer.class)) {
+                return L.toBuffer(index);
+            }
         } else if (type == Lua.LuaType.NUMBER) {
             if (clazz.isPrimitive() || Number.class.isAssignableFrom(clazz)) {
                 Number v;
@@ -995,8 +1009,13 @@ public abstract class JuaAPI {
             }
         } else if (type == Lua.LuaType.USERDATA) {
             Object object = L.toJavaObject(index);
-            if (object != null && clazz.isAssignableFrom(object.getClass())) {
-                return object;
+            if (object != null) {
+                if (clazz.isAssignableFrom(object.getClass())) {
+                    return object;
+                }
+                if (Number.class.isAssignableFrom(object.getClass())) {
+                    return convertNumber((Number) object, clazz);
+                }
             }
         } else if (type == Lua.LuaType.TABLE) {
             if (clazz.isAssignableFrom(List.class)) {
@@ -1093,19 +1112,11 @@ public abstract class JuaAPI {
      * since {@code Executable} is not introduced until Java 8.
      */
     interface ExecutableWrapper<T> {
-        @Nullable
-        String getName(T executable);
-
         Class<?>[] getParameterTypes(T executable);
     }
 
     final static ExecutableWrapper<Constructor<?>> CONSTRUCTOR_WRAPPER =
             new ExecutableWrapper<Constructor<?>>() {
-                @Override
-                public @Nullable String getName(Constructor<?> executable) {
-                    return null;
-                }
-
                 @Override
                 public Class<?>[] getParameterTypes(Constructor<?> executable) {
                     return executable.getParameterTypes();
@@ -1114,11 +1125,6 @@ public abstract class JuaAPI {
 
     final static ExecutableWrapper<Method> METHOD_WRAPPER =
             new ExecutableWrapper<Method>() {
-                @Override
-                public String getName(Method executable) {
-                    return executable.getName();
-                }
-
                 @Override
                 public Class<?>[] getParameterTypes(Method executable) {
                     return executable.getParameterTypes();

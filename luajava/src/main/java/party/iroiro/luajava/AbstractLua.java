@@ -46,6 +46,7 @@ public abstract class AbstractLua implements Lua {
     private final static Object[] EMPTY = new Object[0];
     protected final static LuaInstances<AbstractLua> instances = new LuaInstances<>();
     protected volatile ExternalLoader loader;
+    protected volatile LuaValue requireFunction;
     protected final ReferenceQueue<LuaReferable> recyclableReferences;
     protected final ConcurrentHashMap<Integer, LuaReference<?>> recordedReferences;
 
@@ -71,6 +72,7 @@ public abstract class AbstractLua implements Lua {
         mainThread = this;
         subThreads = new LinkedList<>();
         loader = null;
+        requireFunction = null;
         recyclableReferences = new ReferenceQueue<>();
         recordedReferences = new ConcurrentHashMap<>();
     }
@@ -157,6 +159,8 @@ public abstract class AbstractLua implements Lua {
                     push((Collection<?>) object);
                 } else if (object.getClass().isArray()) {
                     pushArray(object);
+                } else if (object instanceof ByteBuffer) {
+                    push((ByteBuffer) object);
                 } else {
                     pushJavaObject(object);
                 }
@@ -201,6 +205,18 @@ public abstract class AbstractLua implements Lua {
     public void push(@NotNull String string) {
         checkStack(1);
         C.luaJ_pushstring(L, string);
+    }
+
+    @Override
+    public void push(@NotNull ByteBuffer buffer) {
+        checkStack(1);
+        if (!buffer.isDirect()) {
+            ByteBuffer directBuffer = ByteBuffer.allocateDirect(buffer.remaining());
+            directBuffer.put(buffer);
+            directBuffer.flip();
+            buffer = directBuffer;
+        }
+        C.luaJ_pushlstring(L, buffer, buffer.position(), buffer.remaining());
     }
 
     @Override
@@ -346,33 +362,11 @@ public abstract class AbstractLua implements Lua {
 
     @Override
     public @Nullable Object toObject(int index, Class<?> type) {
-        Object converted = toObject(index);
-        if (converted == null) {
+        try {
+            return JuaAPI.convertFromLua(this, type, index);
+        } catch (IllegalArgumentException ignored) {
             return null;
-        } else if (type.isAssignableFrom(converted.getClass())) {
-            return converted;
-        } else if (Number.class.isAssignableFrom(converted.getClass())) {
-            Number number = ((Number) converted);
-            if (type == byte.class || type == Byte.class) {
-                return number.byteValue();
-            }
-            if (type == short.class || type == Short.class) {
-                return number.shortValue();
-            }
-            if (type == int.class || type == Integer.class) {
-                return number.intValue();
-            }
-            if (type == long.class || type == Long.class) {
-                return number.longValue();
-            }
-            if (type == float.class || type == Float.class) {
-                return number.floatValue();
-            }
-            if (type == double.class || type == Double.class) {
-                return number.doubleValue();
-            }
         }
-        return null;
     }
 
     @Override
@@ -598,7 +592,7 @@ public abstract class AbstractLua implements Lua {
     public void load(Buffer buffer, String name) throws LuaException {
         if (buffer.isDirect()) {
             checkStack(1);
-            checkError(C.luaJ_loadbuffer(L, buffer, buffer.limit(), name), false);
+            checkError(C.luaJ_loadbuffer(L, buffer, buffer.position(), buffer.remaining(), name), false);
         } else {
             throw new LuaException(LuaException.LuaError.MEMORY, "Expecting a direct buffer");
         }
@@ -614,7 +608,7 @@ public abstract class AbstractLua implements Lua {
     public void run(Buffer buffer, String name) throws LuaException {
         if (buffer.isDirect()) {
             checkStack(1);
-            checkError(C.luaJ_dobuffer(L, buffer, buffer.limit(), name), true);
+            checkError(C.luaJ_dobuffer(L, buffer, buffer.position(), buffer.remaining(), name), true);
         } else {
             throw new LuaException(LuaException.LuaError.MEMORY, "Expecting a direct buffer");
         }
@@ -1076,6 +1070,21 @@ public abstract class AbstractLua implements Lua {
     }
 
     @Override
+    public LuaValue require(String module) throws LuaException {
+        LuaValue req = requireFunction;
+        if (req == null) {
+            req = get("require");
+            if (req.type() != LuaType.FUNCTION) {
+                openLibrary("package");
+                req = get("require");
+                requireFunction = req;
+            }
+        }
+        LuaValue[] results = req.call(module);
+        return results[0];
+    }
+
+    @Override
     public LuaValue get() {
         LuaType type = type(-1);
         switch (Objects.requireNonNull(type)) {
@@ -1094,7 +1103,7 @@ public abstract class AbstractLua implements Lua {
                 pop(1);
                 return value;
             case STRING:
-                String s = toString(-1);
+                ByteBuffer s = toBuffer(-1);
                 pop(1);
                 return from(s);
             default:
@@ -1130,6 +1139,11 @@ public abstract class AbstractLua implements Lua {
     @Override
     public LuaValue from(String s) {
         return ImmutableLuaValue.STRING(this, s);
+    }
+
+    @Override
+    public LuaValue from(ByteBuffer buffer) {
+        return ImmutableLuaValue.BUFFER(this, buffer);
     }
 
     /**

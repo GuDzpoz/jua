@@ -15,6 +15,7 @@ When pushing a Java value onto the Lua stack, you can choose from doing a `FULL`
 | Boxed numerics (`Integer`...) |                                | :white_check_mark:             | :white_check_mark:             | `lua_Integer` or `lua_Number`      |
 | `String`                      |                                | :white_check_mark:             | :white_check_mark:             | Lua strings                        |
 | `JFunction`                   |                                | :white_check_mark:             | :white_check_mark:             | A Lua closure                      |
+| `ByteBuffer`                  |                                |                                | :white_check_mark:             | Lua raw strings                    |
 | Java arrays                   |                                |                                | :white_check_mark:             | Lua tables (index starting from 1) |
 | `Collections<?>`              |                                |                                | :white_check_mark:             | Lua tables (index starting from 1) |
 | `Map<?, ?>`                   |                                |                                | :white_check_mark:             | Lua tables                         |
@@ -58,7 +59,7 @@ Currently, there is no way to specify how you want the return value converted.
    Trying to convert a number into an `Object` will always yield a boxed `Double`.
    So pay attention when you use `Object::equals` for example.
 
-4. ***string*** to `String`.
+4. ***string*** to `String` or `ByteBuffer`.
 5. ***table*** to `Map<Object, Object>`, `List<Object&gt;`, `Object[]`, (converted recursively with `Map<Object, Object>` preferred) or any interfaces.
 
    To convert tables into any interface,
@@ -81,6 +82,21 @@ Currently, there is no way to specify how you want the return value converted.
 ::: warning
 Currently, you cannot convert a C closure back to a `JFunction`, even if the closure simply wraps around `JFunction`.
 :::
+
+## Raw Strings in Lua
+
+Unlike Java, Lua allows using strings as raw bytes, which means you can have null bytes,
+invalid UTF-8 sequences, or just arbitrary binary data in a string.
+(See [`lua_pushlstring`](https://www.lua.org/manual/5.1/manual.html#lua_pushlstring) for more information.)
+Java, on the other hand, does not allow this and instead often uses `byte[]` for this purpose.
+
+This poses a challenge when converting between Java `byte[]` and Lua strings:
+the library does not know if the user wishes to interpret the `byte[]` data as an array (mapped to Lua tables) of bytes,
+or as a raw Lua string. Currently, the library assumes the former and does not plan to change until the next major version.
+And before that, you will probably need to write a wrapper yourself with
+[`party.iroiro.luajava.Lua#pushString`](./javadoc/party/iroiro/luajava/Lua.html#push(java.nio.ByteBuffer)){target="_self"}
+and
+[`party.iroiro.luajava.Lua#toBuffer`](./javadoc/party/iroiro/luajava/Lua.html#toBuffer(int)){target="_self"} .
 
 ## 64-Bit Integers
 

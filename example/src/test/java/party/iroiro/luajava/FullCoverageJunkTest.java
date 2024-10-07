@@ -36,7 +36,6 @@ public class FullCoverageJunkTest {
         Lua54Consts lua54Consts = new Lua54Consts() {};
         LuaJitConsts luaJitConsts = new LuaJitConsts() {};
         LuaJConsts luaJConsts = new LuaJConsts() {};
-        assertNull(JuaAPI.CONSTRUCTOR_WRAPPER.getName(FullCoverageJunkTest.class.getConstructor()));
 
         Lua51 L = new Lua51();
         ImmutableLuaValue.NIL(L);

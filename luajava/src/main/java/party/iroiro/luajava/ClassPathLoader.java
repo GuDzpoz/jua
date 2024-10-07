@@ -41,6 +41,11 @@ import java.util.Objects;
  * {@link #getPath(String)}. For example, loading a {@code abc.def} module
  * will load a Lua file at {@code classpath://abc/def.lua}.
  * </p>
+ *
+ * <p>
+ * To use this class, call {@link Lua#setExternalLoader(ExternalLoader)} with an instance of this class,
+ * and then you can load modules with the Lua {@code require} function from classpath.
+ * </p>
  */
 public class ClassPathLoader implements ExternalLoader {
     protected final ClassLoader classLoader;

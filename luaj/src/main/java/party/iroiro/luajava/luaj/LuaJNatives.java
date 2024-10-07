@@ -240,7 +240,7 @@ public class LuaJNatives implements LuaNatives {
         FunctionInvoker.setFunction(instances.get((int) J), func.checkfunction());
         return thread;
     }
-    
+
     protected void lua_require_coroutine(long ptr) {
         LuaJState L = instances.get((int) ptr);
         L.globals.load(new CoroutineLib() {
@@ -540,6 +540,10 @@ public class LuaJNatives implements LuaNatives {
     public String lua_tostring(long ptr, int index) {
         LuaJState L = instances.get((int) ptr);
         LuaValue value = L.toLuaValue(index);
+        if (value.isnumber()) {
+            value = value.tostring();
+            L.replace(index, value);
+        }
         return value.tojstring();
     }
 
@@ -807,9 +811,10 @@ public class LuaJNatives implements LuaNatives {
     }
 
     @Override
-    public int luaJ_loadbuffer(long ptr, Buffer buffer, int size, String name) {
+    public int luaJ_loadbuffer(long ptr, Buffer buffer, int start, int size, String name) {
         LuaJState L = instances.get((int) ptr);
-        ByteBuffer bytes = (ByteBuffer) buffer;
+        ByteBuffer bytes = ((ByteBuffer) buffer).duplicate();
+        bytes.position(start).limit(start + size);
         try {
             L.push(
                     L.globals.load(new InputStream() {
@@ -827,8 +832,8 @@ public class LuaJNatives implements LuaNatives {
     }
 
     @Override
-    public int luaJ_dobuffer(long ptr, Buffer buffer, int size, String name) {
-        luaJ_loadbuffer(ptr, buffer, size, name);
+    public int luaJ_dobuffer(long ptr, Buffer buffer, int start, int size, String name) {
+        luaJ_loadbuffer(ptr, buffer, start, size, name);
         return lua_pcall(ptr, 0, LUA_MULTRET, 0);
     }
 
@@ -890,6 +895,16 @@ public class LuaJNatives implements LuaNatives {
                 return checkOrError(L, f.__call(Jua.get(L.lid)));
             }
         });
+    }
+
+    @Override
+    public void luaJ_pushlstring(long ptr, Buffer buffer, int start, int size) {
+        LuaJState L = instances.get((int) ptr);
+        byte[] bytes = new byte[size];
+        ByteBuffer duplicate = ((ByteBuffer) buffer).duplicate();
+        duplicate.position(start).limit(start + size);
+        duplicate.get(bytes);
+        L.push(LuaValue.valueOf(bytes));
     }
 
     @Override
@@ -985,6 +1000,10 @@ public class LuaJNatives implements LuaNatives {
         LuaValue value = L.toLuaValue(index);
         if (!value.isstring()) {
             return null;
+        }
+        if (!(value instanceof LuaString)) {
+            value = value.tostring();
+            L.replace(index, value);
         }
         byte[] bytes = ((LuaString) value).m_bytes;
         ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);

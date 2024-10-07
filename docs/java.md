@@ -35,6 +35,22 @@ To use Lua libraries like `string`, `table` or `coroutine`, you will need to exp
 - [openLibrary](./javadoc/party/iroiro/luajava/Lua.html#openLibrary(java.lang.String)){target="_self"}:
   Opens a specific library.
 
+## Running Lua Files
+
+Lua C API provides a [`luaL_loadfile`](https://www.lua.org/manual/5.4/manual.html#luaL_loadfile){target="_self"} function,
+which loads a Lua file from the file system. 
+However, we deem it less portable to load files from the file system, and have chose to base our API on
+Java classpath loading and Lua's built-in `require` mechanism instead.
+(Actually, you can run any file by loading it into a `ByteBuffer` and running it with
+[`run`](./javadoc/party/iroiro/luajava/Lua.html#run(java.nio.Buffer,java.lang.String)){target="_self"} .)
+
+See [Java-Side Modules](./examples/modules.md) for an example. Basically, to run a file from Java classpath:
+1. Use `L.setExternalLoader(new ClassPathLoader());` to have the `require` function load files from the classpath.
+2. Either run `require('path.to.module')` as Lua code or
+   use [`Lua::require`](./javadoc/party/iroiro/luajava/Lua.html#require(java.lang.String)){target="_self"} to run the file.
+
+<<< ../../example/src/test/java/party/iroiro/luajava/docs/ModuleSnippetTest.java#javaSideModuleTest
+
 ## Interact with Lua values
 
 To interact with Lua values, you can use the [`LuaValue`](#luavalue-interface) interface

@@ -502,11 +502,12 @@ public interface LuaNatives {
      *
      * @param ptr the <code>lua_State*</code> pointer
      * @param buffer the buffer (expecting direct)
+     * @param start the starting index
      * @param size size
      * @param name the name
      * @return see description
      */
-    int luaJ_dobuffer(long ptr, Buffer buffer, int size, String name);
+    int luaJ_dobuffer(long ptr, Buffer buffer, int start, int size, String name);
 
     /**
      * A wrapper function
@@ -589,11 +590,12 @@ public interface LuaNatives {
      *
      * @param ptr the <code>lua_State*</code> pointer
      * @param buffer the buffer (expecting direct)
+     * @param start the starting index
      * @param size size
      * @param name the name
      * @return see description
      */
-    int luaJ_loadbuffer(long ptr, Buffer buffer, int size, String name);
+    int luaJ_loadbuffer(long ptr, Buffer buffer, int start, int size, String name);
 
     /**
      * A wrapper function
@@ -1747,6 +1749,20 @@ public interface LuaNatives {
      * @param func the function object
      */
     void luaJ_pushfunction(long ptr, Object func);
+
+    /**
+     * A wrapper function
+     *
+     * <p>
+     * Push a buffer as a raw Lua string
+     * </p>
+     *
+     * @param ptr the <code>lua_State*</code> pointer
+     * @param buffer the buffer (expecting direct)
+     * @param start the starting index
+     * @param size size
+     */
+    void luaJ_pushlstring(long ptr, Buffer buffer, int start, int size);
 
     /**
      * A wrapper function

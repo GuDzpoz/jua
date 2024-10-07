@@ -3322,14 +3322,15 @@ public class LuaJitNatives implements LuaNatives {
      *
      * @param ptr the <code>lua_State*</code> pointer
      * @param buffer the buffer (expecting direct)
+     * @param start the starting index
      * @param size size
      * @param name the name
      * @return see description
      */
-    public native int luaJ_loadbuffer(long ptr, Buffer buffer, int size, String name); /*
+    public native int luaJ_loadbuffer(long ptr, Buffer buffer, int start, int size, String name); /*
         lua_State * L = (lua_State *) ptr;
 
-        jint returnValueReceiver = (jint) luaJ_loadbuffer((lua_State *) L, (unsigned char *) buffer, (int) size, (const char *) name);
+        jint returnValueReceiver = (jint) luaJ_loadbuffer((lua_State *) L, (unsigned char *) buffer, (int) start, (int) size, (const char *) name);
         return returnValueReceiver;
     */
 
@@ -3343,14 +3344,15 @@ public class LuaJitNatives implements LuaNatives {
      *
      * @param ptr the <code>lua_State*</code> pointer
      * @param buffer the buffer (expecting direct)
+     * @param start the starting index
      * @param size size
      * @param name the name
      * @return see description
      */
-    public native int luaJ_dobuffer(long ptr, Buffer buffer, int size, String name); /*
+    public native int luaJ_dobuffer(long ptr, Buffer buffer, int start, int size, String name); /*
         lua_State * L = (lua_State *) ptr;
 
-        jint returnValueReceiver = (jint) luaJ_dobuffer((lua_State *) L, (unsigned char *) buffer, (int) size, (const char *) name);
+        jint returnValueReceiver = (jint) luaJ_dobuffer((lua_State *) L, (unsigned char *) buffer, (int) start, (int) size, (const char *) name);
         return returnValueReceiver;
     */
 
@@ -3439,6 +3441,25 @@ public class LuaJitNatives implements LuaNatives {
         lua_State * L = (lua_State *) ptr;
 
         luaJ_pushfunction((JNIEnv *) env, (lua_State *) L, (jobject) func);
+    */
+
+
+    /**
+     * A wrapper function
+     *
+     * <p>
+     * Push a buffer as a raw Lua string
+     * </p>
+     *
+     * @param ptr the <code>lua_State*</code> pointer
+     * @param buffer the buffer (expecting direct)
+     * @param start the starting index
+     * @param size size
+     */
+    public native void luaJ_pushlstring(long ptr, Buffer buffer, int start, int size); /*
+        lua_State * L = (lua_State *) ptr;
+
+        luaJ_pushlstring((lua_State *) L, (unsigned char *) buffer, (int) start, (int) size);
     */
 
 

@@ -2,6 +2,8 @@ package party.iroiro.luajava.value;
 
 import party.iroiro.luajava.LuaException;
 
+import java.nio.ByteBuffer;
+
 public interface LuaThread {
     /**
      * Sets a global variable to the given value
@@ -36,6 +38,20 @@ public interface LuaThread {
     LuaValue[] eval(String command) throws LuaException;
 
     /**
+     * Loads a module, similar to the Lua `require` function
+     *
+     * <p>
+     * Please note that this method will attempt to call
+     * {@link party.iroiro.luajava.Lua#openLibrary(String) Lua.openLibrary("package")} first and
+     * cache the global {@code require} function.
+     * </p>
+     *
+     * @param module the module name
+     * @return the module
+     */
+    LuaValue require(String module) throws LuaException;
+
+    /**
      * @return a nil Lua value
      */
     LuaValue fromNull();
@@ -63,4 +79,10 @@ public interface LuaThread {
      * @return a string Lua value
      */
     LuaValue from(String s);
+
+    /**
+     * @param buffer the content of the raw string
+     * @return a raw string Lua value
+     */
+    LuaValue from(ByteBuffer buffer);
 }

@@ -427,6 +427,18 @@ void luaJ_pushfunction(JNIEnv * env, lua_State * L, jobject func) {
   lua_pushcclosure(L, &jfunctionWrapper, 1);
 }
 
+void luaJ_pushlstring(lua_State * L, unsigned char * buffer, int start, int size) {
+  lua_pushlstring(L, ((const char *) buffer) + start, size);
+}
+
+int luaJ_loadbuffer(lua_State * L, unsigned char * buffer, int start, int size, const char * name) {
+    return luaL_loadbuffer(L, ((const char *) buffer) + start, size, name);
+}
+
+int luaJ_dobuffer(lua_State * L, unsigned char * buffer, int start, int size, const char * name) {
+    return (luaL_loadbuffer(L, ((const char *) buffer) + start, size, name) || lua_pcall(L, 0, LUA_MULTRET, 0));
+}
+
 int luaJ_insertloader(lua_State * L, const char * searchers) {
   lua_getglobal(L, "package");
   if (lua_isnil(L, -1)) {

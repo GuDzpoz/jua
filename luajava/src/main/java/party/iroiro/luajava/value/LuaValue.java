@@ -26,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import party.iroiro.luajava.Lua;
 import party.iroiro.luajava.LuaException;
 
+import java.nio.ByteBuffer;
+
 /**
  * A simple wrapper of references to Lua values
  */
@@ -69,6 +71,8 @@ public interface LuaValue extends LuaTableTrait {
     double toNumber();
 
     String toString();
+
+    ByteBuffer toBuffer();
 
     /**
      * Creates a proxy from this value with {@link Lua#createProxy(Class[], Lua.Conversion)}.

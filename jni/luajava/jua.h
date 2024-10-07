@@ -58,6 +58,11 @@ void luaJ_pushclass(JNIEnv * env, lua_State * L, jobject clazz);
 void luaJ_pusharray(JNIEnv * env, lua_State * L, jobject array);
 jobject luaJ_toobject(lua_State * L, int index);
 int luaJ_isobject(lua_State * L, int index);
+void luaJ_pushfunction(JNIEnv * env, lua_State * L, jobject func);
+void luaJ_pushlstring(lua_State * L, unsigned char * buffer, int start, int size);
+
+int luaJ_loadbuffer(lua_State * L, unsigned char * buffer, int start, int size, const char * name);
+int luaJ_dobuffer(lua_State * L, unsigned char * buffer, int start, int size, const char * name);
 
 jobject luaJ_dumptobuffer(lua_State * L);
 jobject luaJ_tobuffer(lua_State * L, int i);
