@@ -14,7 +14,7 @@ repositories {
 }
 
 ext {
-    jlineVersion = '3.26.1'
+    jlineVersion = '3.27.0'
     jUnitVersion = '5.10.2'
 }
 
